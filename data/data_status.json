@@ -1,0 +1,36 @@
+{
+  "updated_at_utc": "2026-10-11T09:36:14+00:00",
+  "start_year": 1990,
+  "requested_end_year": 2026,
+  "country_count": 261,
+  "country_year_observations": 9396,
+  "latest_year_by_indicator": {
+    "inflow_usd": 2025,
+    "outflow_usd": 2025,
+    "inflow_pct_gdp": 2025,
+    "outflow_pct_gdp": 2025,
+    "gdp_usd": 2025,
+    "population": 2025
+  },
+  "sources": [
+    {
+      "name": "World Bank World Development Indicators",
+      "url": "https://api.worldbank.org/v2/"
+    },
+    {
+      "name": "World Bank country metadata",
+      "url": "https://api.worldbank.org/v2/country?format=json"
+    },
+    {
+      "name": "IMF Direct Investment Positions by Counterpart Economy (bilateral data integration planned)",
+      "url": "https://data.imf.org/en/Datasets/DIP"
+    }
+  ],
+  "notes": [
+    "Inward/outward values are annual net flows, not FDI stocks.",
+    "Current US dollar amounts are nominal, not inflation-adjusted.",
+    "Historical group totals use current country classifications.",
+    "Strategic clusters are analyst-defined, overlapping groups.",
+    "WDI does not provide partner-country breakdowns; bilateral position data must be sourced separately from IMF DIP."
+  ]
+}
