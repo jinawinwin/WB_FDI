@@ -40,13 +40,14 @@ CONTINENT_CODE_MAP = {
 }
 
 
-def get_json(url: str, params: dict | None = None, attempts: int = 4):
+def get_json(url: str, params: dict | None = None, attempts: int = 3):
     """GET a public API endpoint with bounded retries and helpful errors."""
     last_error = None
     for attempt in range(attempts):
         try:
-            response = SESSION.get(url, params=params, timeout=90)
+            response = SESSION.get(url, params=params, timeout=35)
             response.raise_for_status()
+            print(f"API response {response.status_code}: {url} ({len(response.content):,} bytes)", flush=True)
             payload = response.json()
             if isinstance(payload, list) and len(payload) > 1 and isinstance(payload[0], dict):
                 if payload[0].get("message"):
@@ -200,12 +201,12 @@ def sum_group(frame: pd.DataFrame, group_type: str, key_col: str, label_col: str
 
 def main() -> None:
     updated_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    print(f"Refreshing World Bank FDI series for {START_YEAR}-{END_YEAR} at {updated_at}")
+    print(f"Refreshing World Bank FDI series for {START_YEAR}-{END_YEAR} at {updated_at}", flush=True)
     metadata = fetch_country_metadata()
     add_continents(metadata)
     indicator_data = {}
     for field, code in INDICATORS.items():
-        print(f"Downloading {field} ({code})")
+        print(f"Downloading {field} ({code})", flush=True)
         indicator_data[field] = fetch_indicator(code, "all")
 
     all_keys = set()
