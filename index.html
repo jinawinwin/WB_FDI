@@ -245,7 +245,8 @@ a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}.shel
     renderTable('exploreCountryTable',hdr,sortRows(members,field).map(function(r){return [esc(r.country_name),esc(r.country_iso3),esc(rawMoney(r[field])),esc(num(r[directionName()+'_pct_gdp'])===null?'—':Number(r[directionName()+'_pct_gdp']).toFixed(2)+'%'),esc(num(r.gdp_usd)===null?'—':String.fromCharCode(36)+(Number(r.gdp_usd)/1e9).toLocaleString(undefined,{maximumFractionDigits:1})+'B')];}));
   }
   function renderBilateral(){
-    var y=currentYear(), rows=rowsForYear(countryRows,y), valid=rows.filter(function(r){return num(r.inflow_usd)!==null&&num(r.outflow_usd)!==null;});
+    var y=currentYear(), rows=rowsForYear(countryRows,y);
+    var valid=rows.filter(function(r){return num(r.inflow_usd)!==null&&num(r.outflow_usd)!==null;});
     document.getElementById('bilateralKpis').innerHTML=[
       ['Economies with both flow directions',String(valid.length),'Selected year '+y],
       ['Positive inward flows',String(valid.filter(function(r){return Number(r.inflow_usd)>0;}).length),'Net inflows greater than zero'],
@@ -253,14 +254,18 @@ a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}.shel
       ['Partner-level observations','Not loaded','Separate bilateral source required']
     ].map(function(k){return '<div class="kpi"><div class="label">'+esc(k[0])+'</div><div class="value">'+esc(k[1])+'</div><div class="sub">'+esc(k[2])+'</div></div>';}).join('');
     var scatter=valid.map(function(r){return {x:Number(r.inflow_usd),y:Number(r.outflow_usd),name:r.country_name,iso3:r.country_iso3};});
-    if(scatter.length && window.Plotly){
-      var layout=defaultLayout('Inward / outward net flows · '+y);layout.xaxis.title='Inward FDI (US$ billions)';layout.yaxis.title='Outward FDI (US$ billions)';layout.xaxis.tickformat=',.0f';layout.yaxis.tickformat=',.0f';
-      Plotly.react('inOutChart',[{type:'scatter',mode:'markers',x:scatter.map(function(r){return r.x/1e9;}),y:scatter.map(function(r){return r.y/1e9;}),text:scatter.map(function(r){return r.name+' ('+r.iso3+')';}),marker:{size:8,color:'#2369a8',opacity:.72},hovertemplate:'%{text}<br>Inward: %{x:,.2f}B<br>Outward: %{y:,.2f}B<extra></extra>'}],layout,{responsive:true,displaylogo:false});
-    } else if(scatter.length) drawEmpty('inOutChart','The chart library could not be loaded. Check your connection or reload the page.');
+    if(scatter.length && window.Plotly){var layout=defaultLayout('Inward / outward net flows · '+y);layout.xaxis.title='Inward FDI (US$ billions)';layout.yaxis.title='Outward FDI (US$ billions)';layout.xaxis.tickformat=',.0f';layout.yaxis.tickformat=',.0f';Plotly.react('inOutChart',[{type:'scatter',mode:'markers',x:scatter.map(function(r){return r.x/1e9;}),y:scatter.map(function(r){return r.y/1e9;}),text:scatter.map(function(r){return r.name+' ('+r.iso3+')';}),marker:{size:8,color:'#2369a8',opacity:.72},hovertemplate:'%{text}<br>Inward: %{x:,.2f}B<br>Outward: %{y:,.2f}B<extra></extra>'}],layout,{responsive:true,displaylogo:false});}
+    else if(scatter.length) drawEmpty('inOutChart','The chart library could not be loaded. Check your connection or reload the page.');
     else drawEmpty('inOutChart','No paired inward/outward observations for the selected year.');
     var top=valid.map(function(r){return {r:r,balance:Number(r.inflow_usd)-Number(r.outflow_usd),gross:Math.abs(Number(r.inflow_usd))+Math.abs(Number(r.outflow_usd))};}).sort(function(a,b){return b.gross-a.gross;}).slice(0,20);
     var hdr=[{label:'Rank'},{label:'Economy'},{label:'ISO3'},{label:'Inward FDI',num:true},{label:'Outward FDI',num:true},{label:'Inward − outward',num:true},{label:'Combined absolute flows',num:true}];
-    renderTable('inOutTable',hdr,top.map(function(x,i){return [String(i+1),esc(x.r.country_name),esc(x.r.country_iso3),esc('
+    renderTable('inOutTable',hdr,top.map(function(x,i){return [String(i+1),esc(x.r.country_name),esc(x.r.country_iso3),esc('$'+(Number(x.r.inflow_usd)/1e9).toLocaleString(undefined,{maximumFractionDigits:2})+'B'),esc('$'+(Number(x.r.outflow_usd)/1e9).toLocaleString(undefined,{maximumFractionDigits:2})+'B'),esc('$'+(x.balance/1e9).toLocaleString(undefined,{maximumFractionDigits:2})+'B'),esc('$'+(x.gross/1e9).toLocaleString(undefined,{maximumFractionDigits:2})+'B')];}));
+    if(window.Plotly && top.length){var mags=top.map(function(x){return x.gross/1e9;});var maxMag=Math.max.apply(null,mags.concat([1]));var mapLayout=defaultLayout('Top 20 paired economies · '+y);mapLayout.geo={showframe:false,showcoastlines:true,coastlinecolor:'#cbd5e1',showland:true,landcolor:'#f0f4f7',showocean:true,oceancolor:'#ffffff',projection:{type:'natural earth'}};mapLayout.margin={l:0,r:0,t:36,b:0};Plotly.react('pairedFlowMap',[{type:'scattergeo',locationmode:'ISO-3',locations:top.map(function(x){return x.r.country_iso3;}),text:top.map(function(x){return x.r.country_name;}),customdata:top.map(function(x){return [x.r.country_iso3,Number(x.r.inflow_usd)/1e9,Number(x.r.outflow_usd)/1e9,x.balance/1e9,x.gross/1e9];}),mode:'markers',marker:{size:mags.map(function(v){return 8+24*Math.sqrt(Math.max(0,v)/maxMag);}),color:top.map(function(x){return x.balance/1e9;}),colorscale:'RdBu',reversescale:true,showscale:true,colorbar:{title:'Inward − outward<br>US$ bn'},opacity:.78,line:{width:1,color:'#ffffff'}},hovertemplate:'%{text} (%{customdata[0]})<br>Inward: US$%{customdata[1]:,.2f}B<br>Outward: US$%{customdata[2]:,.2f}B<br>Inward − outward: US$%{customdata[3]:,.2f}B<br>Combined absolute flows: US$%{customdata[4]:,.2f}B<extra></extra>'}],mapLayout,{responsive:true,displaylogo:false});}
+    else drawEmpty('pairedFlowMap','No mappable paired-economy observations for the selected year.');
+    var csvHeaders=['year','rank_by_combined_absolute_flows','country_name','country_iso3','inward_fdi_usd','outward_fdi_usd','inward_minus_outward_usd','combined_absolute_flows_usd'];
+    var csvRows=[csvHeaders].concat(top.map(function(x,i){return [y,i+1,x.r.country_name,x.r.country_iso3,Number(x.r.inflow_usd),Number(x.r.outflow_usd),x.balance,x.gross];}));
+    var csvText='\\uFEFF'+csvRows.map(function(row){return row.map(function(v){var z=String(v===null||v===undefined?'':v);return '"'+z.replace(/"/g,'""')+'"';}).join(',');}).join('\\r\\n');
+    var exportButton=document.getElementById('exportPairedCsv');if(exportButton)exportButton.onclick=function(){var blob=new Blob([csvText],{type:'text/csv;charset=utf-8;'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='fdi_paired_economies_'+y+'_top20.csv';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);};
   }
   function renderAll(){
     if(!countryRows.length){
@@ -302,232 +307,6 @@ a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}.shel
     document.getElementById('statusSub').textContent=String(err&&err.message?err.message:err);
     drawEmpty('globalTrend','Could not load one or more JSON data files. Check the data links below or retry after the GitHub Pages deployment finishes.');
     ['top20Chart','worldMap','groupCompareChart','exploreTrend','groupMap','inOutChart','pairedFlowMap'].forEach(function(id){drawEmpty(id,'Dashboard data or chart library is unavailable.');});
-  });
-  document.querySelectorAll('.tab').forEach(function(btn){btn.addEventListener('click',function(){activate(btn.getAttribute('data-tab'));});});
-  yearEl.addEventListener('change',function(){if(tab==='bilateral')renderBilateral();else renderAll();});
-  basisEl.addEventListener('change',function(){fillYears();renderAll();});
-  document.getElementById('periodSelect').addEventListener('change',renderAll);
-  groupTypeEl.addEventListener('change',function(){renderGroupComparison();});
-  exploreTypeEl.addEventListener('change',refreshExploreGroups);
-  exploreGroupEl.addEventListener('change',renderExplorer);
-})();
-</script>
-</body>
-</html>
-+(Number(x.r.inflow_usd)/1e9).toLocaleString(undefined,{maximumFractionDigits:2})+'B'),esc('
-  }
-  function renderAll(){
-    if(!countryRows.length){
-      document.getElementById('dataStatus').textContent='Data files are not available yet';
-      document.getElementById('statusSub').textContent='Run Actions → Refresh World Bank FDI data to generate the panel.';
-      drawEmpty('globalTrend','The country panel has not been generated yet. Run the repository data-refresh workflow.');
-      return;
-    }
-    renderGlobal();renderRanking();renderGroupComparison();
-    // Do not build charts inside the hidden bilateral tab. Hidden Plotly charts can
-    // initialise at zero width and can throw if the external chart library is blocked.
-    if(tab==='bilateral')renderBilateral();
-    if(window.Plotly)charts.forEach(function(id){var el=document.getElementById(id);if(el&&el.offsetParent!==null)try{Plotly.Plots.resize(el);}catch(e){}});
-  }
-  function activate(name){
-    tab=name;
-    document.querySelectorAll('.tab').forEach(function(btn){btn.classList.toggle('active',btn.getAttribute('data-tab')===name);});
-    document.getElementById('analysisView').classList.toggle('hidden',name==='bilateral');
-    document.getElementById('bilateralView').classList.toggle('hidden',name!=='bilateral');
-    document.getElementById('mainToolbar').classList.toggle('hidden',name==='bilateral');
-    if(name==='inward'||name==='outward')renderAll();else renderBilateral();
-  }
-  function loadJson(path){return fetch(path+'?v='+Date.now()).then(function(res){if(!res.ok)throw new Error('HTTP '+res.status+' loading '+path);return res.json();});}
-  Promise.all([
-    loadJson('data/fdi_country_panel.json'),
-    loadJson('data/fdi_global_panel.json'),
-    loadJson('data/fdi_group_panel.json'),
-    loadJson('data/data_status.json')
-  ]).then(function(values){
-    countryRows=values[0]||[];globalRows=values[1]||[];groupRows=values[2]||[];status=values[3]||{};
-    fillYears();
-    document.getElementById('dataStatus').textContent='Data refreshed';
-    document.getElementById('statusSub').textContent=(status.updated_at_utc?'UTC '+status.updated_at_utc:'Timestamp unavailable')+' · '+(status.country_count||0)+' economies';
-    document.getElementById('footerStatus').textContent='Last refresh: '+(status.updated_at_utc||'not reported')+' · '+(status.country_year_observations||0).toLocaleString()+' country-year rows';
-    renderAll();
-  }).catch(function(err){
-    console.error(err);
-    document.getElementById('dataStatus').textContent='Unable to load dashboard data';
-    document.getElementById('statusSub').textContent=String(err&&err.message?err.message:err);
-    drawEmpty('globalTrend','Could not load one or more JSON data files. Check the data links below or retry after the GitHub Pages deployment finishes.');
-    ['top20Chart','worldMap','groupCompareChart','exploreTrend','groupMap','inOutChart'].forEach(function(id){drawEmpty(id,'Dashboard data or chart library is unavailable.');});
-  });
-  document.querySelectorAll('.tab').forEach(function(btn){btn.addEventListener('click',function(){activate(btn.getAttribute('data-tab'));});});
-  yearEl.addEventListener('change',function(){if(tab==='bilateral')renderBilateral();else renderAll();});
-  basisEl.addEventListener('change',function(){fillYears();renderAll();});
-  document.getElementById('periodSelect').addEventListener('change',renderAll);
-  groupTypeEl.addEventListener('change',function(){renderGroupComparison();});
-  exploreTypeEl.addEventListener('change',refreshExploreGroups);
-  exploreGroupEl.addEventListener('change',renderExplorer);
-})();
-</script>
-</body>
-</html>
-+(Number(x.r.outflow_usd)/1e9).toLocaleString(undefined,{maximumFractionDigits:2})+'B'),esc('
-  }
-  function renderAll(){
-    if(!countryRows.length){
-      document.getElementById('dataStatus').textContent='Data files are not available yet';
-      document.getElementById('statusSub').textContent='Run Actions → Refresh World Bank FDI data to generate the panel.';
-      drawEmpty('globalTrend','The country panel has not been generated yet. Run the repository data-refresh workflow.');
-      return;
-    }
-    renderGlobal();renderRanking();renderGroupComparison();
-    // Do not build charts inside the hidden bilateral tab. Hidden Plotly charts can
-    // initialise at zero width and can throw if the external chart library is blocked.
-    if(tab==='bilateral')renderBilateral();
-    if(window.Plotly)charts.forEach(function(id){var el=document.getElementById(id);if(el&&el.offsetParent!==null)try{Plotly.Plots.resize(el);}catch(e){}});
-  }
-  function activate(name){
-    tab=name;
-    document.querySelectorAll('.tab').forEach(function(btn){btn.classList.toggle('active',btn.getAttribute('data-tab')===name);});
-    document.getElementById('analysisView').classList.toggle('hidden',name==='bilateral');
-    document.getElementById('bilateralView').classList.toggle('hidden',name!=='bilateral');
-    document.getElementById('mainToolbar').classList.toggle('hidden',name==='bilateral');
-    if(name==='inward'||name==='outward')renderAll();else renderBilateral();
-  }
-  function loadJson(path){return fetch(path+'?v='+Date.now()).then(function(res){if(!res.ok)throw new Error('HTTP '+res.status+' loading '+path);return res.json();});}
-  Promise.all([
-    loadJson('data/fdi_country_panel.json'),
-    loadJson('data/fdi_global_panel.json'),
-    loadJson('data/fdi_group_panel.json'),
-    loadJson('data/data_status.json')
-  ]).then(function(values){
-    countryRows=values[0]||[];globalRows=values[1]||[];groupRows=values[2]||[];status=values[3]||{};
-    fillYears();
-    document.getElementById('dataStatus').textContent='Data refreshed';
-    document.getElementById('statusSub').textContent=(status.updated_at_utc?'UTC '+status.updated_at_utc:'Timestamp unavailable')+' · '+(status.country_count||0)+' economies';
-    document.getElementById('footerStatus').textContent='Last refresh: '+(status.updated_at_utc||'not reported')+' · '+(status.country_year_observations||0).toLocaleString()+' country-year rows';
-    renderAll();
-  }).catch(function(err){
-    console.error(err);
-    document.getElementById('dataStatus').textContent='Unable to load dashboard data';
-    document.getElementById('statusSub').textContent=String(err&&err.message?err.message:err);
-    drawEmpty('globalTrend','Could not load one or more JSON data files. Check the data links below or retry after the GitHub Pages deployment finishes.');
-    ['top20Chart','worldMap','groupCompareChart','exploreTrend','groupMap','inOutChart'].forEach(function(id){drawEmpty(id,'Dashboard data or chart library is unavailable.');});
-  });
-  document.querySelectorAll('.tab').forEach(function(btn){btn.addEventListener('click',function(){activate(btn.getAttribute('data-tab'));});});
-  yearEl.addEventListener('change',function(){if(tab==='bilateral')renderBilateral();else renderAll();});
-  basisEl.addEventListener('change',function(){fillYears();renderAll();});
-  document.getElementById('periodSelect').addEventListener('change',renderAll);
-  groupTypeEl.addEventListener('change',function(){renderGroupComparison();});
-  exploreTypeEl.addEventListener('change',refreshExploreGroups);
-  exploreGroupEl.addEventListener('change',renderExplorer);
-})();
-</script>
-</body>
-</html>
-+(x.balance/1e9).toLocaleString(undefined,{maximumFractionDigits:2})+'B'),esc('
-  }
-  function renderAll(){
-    if(!countryRows.length){
-      document.getElementById('dataStatus').textContent='Data files are not available yet';
-      document.getElementById('statusSub').textContent='Run Actions → Refresh World Bank FDI data to generate the panel.';
-      drawEmpty('globalTrend','The country panel has not been generated yet. Run the repository data-refresh workflow.');
-      return;
-    }
-    renderGlobal();renderRanking();renderGroupComparison();
-    // Do not build charts inside the hidden bilateral tab. Hidden Plotly charts can
-    // initialise at zero width and can throw if the external chart library is blocked.
-    if(tab==='bilateral')renderBilateral();
-    if(window.Plotly)charts.forEach(function(id){var el=document.getElementById(id);if(el&&el.offsetParent!==null)try{Plotly.Plots.resize(el);}catch(e){}});
-  }
-  function activate(name){
-    tab=name;
-    document.querySelectorAll('.tab').forEach(function(btn){btn.classList.toggle('active',btn.getAttribute('data-tab')===name);});
-    document.getElementById('analysisView').classList.toggle('hidden',name==='bilateral');
-    document.getElementById('bilateralView').classList.toggle('hidden',name!=='bilateral');
-    document.getElementById('mainToolbar').classList.toggle('hidden',name==='bilateral');
-    if(name==='inward'||name==='outward')renderAll();else renderBilateral();
-  }
-  function loadJson(path){return fetch(path+'?v='+Date.now()).then(function(res){if(!res.ok)throw new Error('HTTP '+res.status+' loading '+path);return res.json();});}
-  Promise.all([
-    loadJson('data/fdi_country_panel.json'),
-    loadJson('data/fdi_global_panel.json'),
-    loadJson('data/fdi_group_panel.json'),
-    loadJson('data/data_status.json')
-  ]).then(function(values){
-    countryRows=values[0]||[];globalRows=values[1]||[];groupRows=values[2]||[];status=values[3]||{};
-    fillYears();
-    document.getElementById('dataStatus').textContent='Data refreshed';
-    document.getElementById('statusSub').textContent=(status.updated_at_utc?'UTC '+status.updated_at_utc:'Timestamp unavailable')+' · '+(status.country_count||0)+' economies';
-    document.getElementById('footerStatus').textContent='Last refresh: '+(status.updated_at_utc||'not reported')+' · '+(status.country_year_observations||0).toLocaleString()+' country-year rows';
-    renderAll();
-  }).catch(function(err){
-    console.error(err);
-    document.getElementById('dataStatus').textContent='Unable to load dashboard data';
-    document.getElementById('statusSub').textContent=String(err&&err.message?err.message:err);
-    drawEmpty('globalTrend','Could not load one or more JSON data files. Check the data links below or retry after the GitHub Pages deployment finishes.');
-    ['top20Chart','worldMap','groupCompareChart','exploreTrend','groupMap','inOutChart'].forEach(function(id){drawEmpty(id,'Dashboard data or chart library is unavailable.');});
-  });
-  document.querySelectorAll('.tab').forEach(function(btn){btn.addEventListener('click',function(){activate(btn.getAttribute('data-tab'));});});
-  yearEl.addEventListener('change',function(){if(tab==='bilateral')renderBilateral();else renderAll();});
-  basisEl.addEventListener('change',function(){fillYears();renderAll();});
-  document.getElementById('periodSelect').addEventListener('change',renderAll);
-  groupTypeEl.addEventListener('change',function(){renderGroupComparison();});
-  exploreTypeEl.addEventListener('change',refreshExploreGroups);
-  exploreGroupEl.addEventListener('change',renderExplorer);
-})();
-</script>
-</body>
-</html>
-+(x.gross/1e9).toLocaleString(undefined,{maximumFractionDigits:2})+'B')];}));
-    if(window.Plotly && top.length){
-      var mags=top.map(function(x){return x.gross/1e9;});
-      var maxMag=Math.max.apply(null,mags.concat([1]));
-      Plotly.react('pairedFlowMap',[{type:'scattergeo',locationmode:'ISO-3',locations:top.map(function(x){return x.r.country_iso3;}),text:top.map(function(x){return x.r.country_name;}),customdata:top.map(function(x){return [x.r.country_iso3,Number(x.r.inflow_usd)/1e9,Number(x.r.outflow_usd)/1e9,x.balance/1e9,x.gross/1e9];}),mode:'markers',marker:{size:mags.map(function(v){return 8+24*Math.sqrt(Math.max(0,v)/maxMag);}),color:top.map(function(x){return x.balance/1e9;}),colorscale:'RdBu',reversescale:true,showscale:true,colorbar:{title:'Inward − outward<br>US$ bn'},opacity:.78,line:{width:1,color:'#ffffff'}},hovertemplate:'%{text} (%{customdata[0]})<br>Inward: US$%{customdata[1]:,.2f}B<br>Outward: US$%{customdata[2]:,.2f}B<br>Inward − outward: US$%{customdata[3]:,.2f}B<br>Combined absolute flows: US$%{customdata[4]:,.2f}B<extra></extra>'}],{...defaultLayout('Top 20 paired economies · '+y),geo:{showframe:false,showcoastlines:true,coastlinecolor:'#cbd5e1',showland:true,landcolor:'#f0f4f7',showocean:true,oceancolor:'#ffffff',projection:{type:'natural earth'}},margin:{l:0,r:0,t:36,b:0}},{responsive:true,displaylogo:false});
-    } else drawEmpty('pairedFlowMap','No mappable paired-economy observations for the selected year.');
-    var csvHeaders=['year','rank_by_combined_absolute_flows','country_name','country_iso3','inward_fdi_usd','outward_fdi_usd','inward_minus_outward_usd','combined_absolute_flows_usd'];
-    var csvRows=[csvHeaders].concat(top.map(function(x,i){return [y,i+1,x.r.country_name,x.r.country_iso3,Number(x.r.inflow_usd),Number(x.r.outflow_usd),x.balance,x.gross];}));
-    var csvText='\\uFEFF'+csvRows.map(function(row){return row.map(function(v){var s=String(v===null||v===undefined?'':v);return '"'+s.replace(/"/g,'""')+'"';}).join(',');}).join('\\r\\n');
-    var exportButton=document.getElementById('exportPairedCsv');
-    if(exportButton)exportButton.onclick=function(){var blob=new Blob([csvText],{type:'text/csv;charset=utf-8;'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='fdi_paired_economies_'+y+'_top20.csv';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);};
-  }
-  function renderAll(){
-    if(!countryRows.length){
-      document.getElementById('dataStatus').textContent='Data files are not available yet';
-      document.getElementById('statusSub').textContent='Run Actions → Refresh World Bank FDI data to generate the panel.';
-      drawEmpty('globalTrend','The country panel has not been generated yet. Run the repository data-refresh workflow.');
-      return;
-    }
-    renderGlobal();renderRanking();renderGroupComparison();
-    // Do not build charts inside the hidden bilateral tab. Hidden Plotly charts can
-    // initialise at zero width and can throw if the external chart library is blocked.
-    if(tab==='bilateral')renderBilateral();
-    if(window.Plotly)charts.forEach(function(id){var el=document.getElementById(id);if(el&&el.offsetParent!==null)try{Plotly.Plots.resize(el);}catch(e){}});
-  }
-  function activate(name){
-    tab=name;
-    document.querySelectorAll('.tab').forEach(function(btn){btn.classList.toggle('active',btn.getAttribute('data-tab')===name);});
-    document.getElementById('analysisView').classList.toggle('hidden',name==='bilateral');
-    document.getElementById('bilateralView').classList.toggle('hidden',name!=='bilateral');
-    document.getElementById('mainToolbar').classList.toggle('hidden',name==='bilateral');
-    if(name==='inward'||name==='outward')renderAll();else renderBilateral();
-  }
-  function loadJson(path){return fetch(path+'?v='+Date.now()).then(function(res){if(!res.ok)throw new Error('HTTP '+res.status+' loading '+path);return res.json();});}
-  Promise.all([
-    loadJson('data/fdi_country_panel.json'),
-    loadJson('data/fdi_global_panel.json'),
-    loadJson('data/fdi_group_panel.json'),
-    loadJson('data/data_status.json')
-  ]).then(function(values){
-    countryRows=values[0]||[];globalRows=values[1]||[];groupRows=values[2]||[];status=values[3]||{};
-    fillYears();
-    document.getElementById('dataStatus').textContent='Data refreshed';
-    document.getElementById('statusSub').textContent=(status.updated_at_utc?'UTC '+status.updated_at_utc:'Timestamp unavailable')+' · '+(status.country_count||0)+' economies';
-    document.getElementById('footerStatus').textContent='Last refresh: '+(status.updated_at_utc||'not reported')+' · '+(status.country_year_observations||0).toLocaleString()+' country-year rows';
-    renderAll();
-  }).catch(function(err){
-    console.error(err);
-    document.getElementById('dataStatus').textContent='Unable to load dashboard data';
-    document.getElementById('statusSub').textContent=String(err&&err.message?err.message:err);
-    drawEmpty('globalTrend','Could not load one or more JSON data files. Check the data links below or retry after the GitHub Pages deployment finishes.');
-    ['top20Chart','worldMap','groupCompareChart','exploreTrend','groupMap','inOutChart'].forEach(function(id){drawEmpty(id,'Dashboard data or chart library is unavailable.');});
   });
   document.querySelectorAll('.tab').forEach(function(btn){btn.addEventListener('click',function(){activate(btn.getAttribute('data-tab'));});});
   yearEl.addEventListener('change',function(){if(tab==='bilateral')renderBilateral();else renderAll();});
