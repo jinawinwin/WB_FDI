@@ -17,7 +17,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: update-world-bank-fdi
+  group: update-world-bank-fdi-v2
   cancel-in-progress: false
 
 jobs:
