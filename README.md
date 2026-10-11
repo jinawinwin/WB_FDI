@@ -58,3 +58,5 @@ Open **Actions → Refresh World Bank FDI data → Run workflow**. The workflow 
 - [IMF DIP dataset](https://data.imf.org/en/Datasets/DIP)
 
 The World Bank Indicators API is public and does not require an API key.
+
+https://datahelpdesk.worldbank.org/knowledgebase/articles/889392-about-the-indicators-api-documentation
