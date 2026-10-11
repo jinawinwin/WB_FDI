@@ -68,13 +68,21 @@ def fetch_country_metadata() -> dict[str, dict]:
         iso3 = (item.get("id") or "").upper()
         region = item.get("region") or {}
         income = item.get("incomeLevel") or {}
-        # Country records have a populated World Bank region. Aggregate entries do not.
-        if len(iso3) != 3 or not region.get("id"):
+        region_id = (region.get("id") or "").strip()
+        region_name = (region.get("value") or "").strip()
+        # Exclude World Bank aggregate pseudo-economies (WLD, HIC, EAS, AFE, etc.).
+        # They can have three-character codes and are not individual reporting economies.
+        if (
+            len(iso3) != 3
+            or not region_id
+            or region_id == "NA"
+            or region_name.lower() == "aggregates"
+        ):
             continue
         metadata[iso3] = {
             "country_name": item.get("name"),
-            "region_id": region.get("id"),
-            "region_name": region.get("value"),
+            "region_id": region_id,
+            "region_name": region_name,
             "income_level_id": income.get("id") or "NA",
             "income_level_name": income.get("value") or "Not classified",
             "latitude": as_float(item.get("latitude")),
