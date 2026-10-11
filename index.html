@@ -241,7 +241,7 @@ a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}.shel
     var members=rowsForYear(countryRows,y).filter(function(r){return countryMatchesGroup(r,type,groupId,groupName)&&num(r[field])!==null;});
     plotMap('groupMap',members,field,groupName+' · '+y);
     var hdr=[{label:'Economy'},{label:'ISO3'},{label:'FDI',num:true},{label:'FDI / GDP',num:true},{label:'GDP',num:true}];
-    renderTable('exploreCountryTable',hdr,sortRows(members,field).map(function(r){return [esc(r.country_name),esc(r.country_iso3),esc(rawMoney(r[field])),esc(num(r[directionName()+'_pct_gdp'])===null?'—':Number(r[directionName()+'_pct_gdp']).toFixed(2)+'%'),esc(num(r.gdp_usd)===null?'—':'
+    renderTable('exploreCountryTable',hdr,sortRows(members,field).map(function(r){return [esc(r.country_name),esc(r.country_iso3),esc(rawMoney(r[field])),esc(num(r[directionName()+'_pct_gdp'])===null?'—':Number(r[directionName()+'_pct_gdp']).toFixed(2)+'%'),esc(num(r.gdp_usd)===null?'—':String.fromCharCode(36)+(Number(r.gdp_usd)/1e9).toLocaleString(undefined,{maximumFractionDigits:1})+'B')];}));
   }
   function renderBilateral(){
     var y=currentYear(), rows=rowsForYear(countryRows,y), valid=rows.filter(function(r){return num(r.inflow_usd)!==null&&num(r.outflow_usd)!==null;});
