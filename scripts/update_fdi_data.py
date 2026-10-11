@@ -154,7 +154,10 @@ def load_cluster_definitions() -> dict[str, tuple[str, set[str]]]:
 
 def clean_for_json(frame: pd.DataFrame) -> pd.DataFrame:
     """Convert pandas missing / infinite values to JSON nulls."""
-    return frame.replace([float("inf"), float("-inf")], pd.NA).where(pd.notna(frame), None)
+    clean = frame.copy().astype(object)
+    clean = clean.where(pd.notna(clean), None)
+    clean = clean.replace([float("inf"), float("-inf")], None)
+    return clean
 
 
 def write_panel(frame: pd.DataFrame, stem: str) -> None:
