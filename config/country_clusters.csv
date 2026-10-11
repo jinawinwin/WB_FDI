@@ -1,0 +1,84 @@
+cluster_id,cluster_name,iso3
+critical_minerals,Critical minerals and battery materials,AUS
+critical_minerals,Critical minerals and battery materials,ARG
+critical_minerals,Critical minerals and battery materials,BOL
+critical_minerals,Critical minerals and battery materials,BRA
+critical_minerals,Critical minerals and battery materials,CAN
+critical_minerals,Critical minerals and battery materials,CHL
+critical_minerals,Critical minerals and battery materials,CHN
+critical_minerals,Critical minerals and battery materials,COD
+critical_minerals,Critical minerals and battery materials,FIN
+critical_minerals,Critical minerals and battery materials,GIN
+critical_minerals,Critical minerals and battery materials,IDN
+critical_minerals,Critical minerals and battery materials,MNG
+critical_minerals,Critical minerals and battery materials,MOZ
+critical_minerals,Critical minerals and battery materials,PER
+critical_minerals,Critical minerals and battery materials,RUS
+critical_minerals,Critical minerals and battery materials,ZAF
+critical_minerals,Critical minerals and battery materials,ZMB
+energy,Energy and hydrocarbons,AGO
+energy,Energy and hydrocarbons,ARE
+energy,Energy and hydrocarbons,ARG
+energy,Energy and hydrocarbons,AZE
+energy,Energy and hydrocarbons,BRA
+energy,Energy and hydrocarbons,CAN
+energy,Energy and hydrocarbons,CHN
+energy,Energy and hydrocarbons,DZA
+energy,Energy and hydrocarbons,IRN
+energy,Energy and hydrocarbons,IRQ
+energy,Energy and hydrocarbons,KAZ
+energy,Energy and hydrocarbons,KWT
+energy,Energy and hydrocarbons,NGA
+energy,Energy and hydrocarbons,NOR
+energy,Energy and hydrocarbons,QAT
+energy,Energy and hydrocarbons,RUS
+energy,Energy and hydrocarbons,SAU
+energy,Energy and hydrocarbons,USA
+energy,Energy and hydrocarbons,VEN
+semiconductors,Semiconductors and advanced manufacturing,CHN
+semiconductors,Semiconductors and advanced manufacturing,DEU
+semiconductors,Semiconductors and advanced manufacturing,IRL
+semiconductors,Semiconductors and advanced manufacturing,ISR
+semiconductors,Semiconductors and advanced manufacturing,JPN
+semiconductors,Semiconductors and advanced manufacturing,KOR
+semiconductors,Semiconductors and advanced manufacturing,MYS
+semiconductors,Semiconductors and advanced manufacturing,NLD
+semiconductors,Semiconductors and advanced manufacturing,SGP
+semiconductors,Semiconductors and advanced manufacturing,TWN
+semiconductors,Semiconductors and advanced manufacturing,USA
+semiconductors,Semiconductors and advanced manufacturing,VNM
+supply_chain_hubs,Major supply-chain and logistics hubs,CHN
+supply_chain_hubs,Major supply-chain and logistics hubs,CZE
+supply_chain_hubs,Major supply-chain and logistics hubs,DEU
+supply_chain_hubs,Major supply-chain and logistics hubs,HKG
+supply_chain_hubs,Major supply-chain and logistics hubs,HUN
+supply_chain_hubs,Major supply-chain and logistics hubs,IDN
+supply_chain_hubs,Major supply-chain and logistics hubs,IND
+supply_chain_hubs,Major supply-chain and logistics hubs,IRL
+supply_chain_hubs,Major supply-chain and logistics hubs,JPN
+supply_chain_hubs,Major supply-chain and logistics hubs,KOR
+supply_chain_hubs,Major supply-chain and logistics hubs,MEX
+supply_chain_hubs,Major supply-chain and logistics hubs,MYS
+supply_chain_hubs,Major supply-chain and logistics hubs,NLD
+supply_chain_hubs,Major supply-chain and logistics hubs,POL
+supply_chain_hubs,Major supply-chain and logistics hubs,SGP
+supply_chain_hubs,Major supply-chain and logistics hubs,THA
+supply_chain_hubs,Major supply-chain and logistics hubs,TUR
+supply_chain_hubs,Major supply-chain and logistics hubs,USA
+supply_chain_hubs,Major supply-chain and logistics hubs,VNM
+diversification,Nearshoring and supply-chain diversification,CHE
+diversification,Nearshoring and supply-chain diversification,CRI
+diversification,Nearshoring and supply-chain diversification,CZE
+diversification,Nearshoring and supply-chain diversification,DOM
+diversification,Nearshoring and supply-chain diversification,HUN
+diversification,Nearshoring and supply-chain diversification,IND
+diversification,Nearshoring and supply-chain diversification,MAR
+diversification,Nearshoring and supply-chain diversification,MEX
+diversification,Nearshoring and supply-chain diversification,MYS
+diversification,Nearshoring and supply-chain diversification,PHL
+diversification,Nearshoring and supply-chain diversification,POL
+diversification,Nearshoring and supply-chain diversification,ROU
+diversification,Nearshoring and supply-chain diversification,SRB
+diversification,Nearshoring and supply-chain diversification,THA
+diversification,Nearshoring and supply-chain diversification,TUR
+diversification,Nearshoring and supply-chain diversification,VNM
